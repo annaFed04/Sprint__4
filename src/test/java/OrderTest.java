@@ -2,16 +2,13 @@
 import BasePage.HomePage;
 import BasePage.OrderPage;
 import BasePage.utile.AllConfig;
+import BasePage.utile.DriverFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.Arrays;
@@ -51,7 +48,7 @@ public class OrderTest {
         this.comment = comment;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "Тест {0}: {1} {2}")
     public static Collection<Object[]> Data() {
         return Arrays.asList(new Object[][]{
                 // Тесты для Chrome
@@ -59,24 +56,20 @@ public class OrderTest {
                 {"chrome", "Царевна", "Несмеяная", "Башня", "Владыкино", "+9188192233", "10.11.2025", "семеро суток", "grey", "с доп колесами"},
                 // Тесты для Firefox
                 {"firefox", "Иван", "Царевич", "Болото", "Фрунзенская", "+79188192233", "25.10.2025", "трое суток", "black", "с лягушкой в корыте"},
-                {"firefox", "Царевна", "Несмеяная", "Башня", "Владыкино", "+9188192233", "10.11.2025", "семеро суток", "grey", "с доп колесами"}
+                {"firefox", "Царевна", "Несмеяная", "Башня", "Владыкино", "+9188192233", "10.11.2025", "семеро суток", "grey", "с доп колесами"},
         });
     }
 
     @Before
     public void setUp() {
-        if (browser.equalsIgnoreCase("chrome")) {
-            ChromeOptions options = new ChromeOptions();
-            driver = new ChromeDriver(options);
-        } else if (browser.equalsIgnoreCase("firefox")) {
-            FirefoxOptions options = new FirefoxOptions();
-            driver = new FirefoxDriver(options);
-        }
+        // Открытие браузера через DriverFactory
+        driver = DriverFactory.getDriver(browser);
 
         WebDriverWait wait = new WebDriverWait(driver, AllConfig.TIMEOUT_15);
 
         homePage = new HomePage(driver);
         orderPage = new OrderPage(driver);
+
 
         homePage.openHomePage();
         homePage.clickCookie();
@@ -97,12 +90,13 @@ public class OrderTest {
         orderPage.enterBlack(scooterColor.equals("black"));
         orderPage.enterComments(comment);
         orderPage.clickOrderButton();
+        orderPage.clickOkButton();
+        orderPage.clickConfirm();
     }
 
     @After
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        // Закрытие браузера через DriverFactory
+        DriverFactory.quitDriver();
     }
 }
